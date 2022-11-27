@@ -1,4 +1,4 @@
-
+import matplotlib.pyplot as plt
 # матрица смежности
 matrix = [
     [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3],
@@ -82,8 +82,6 @@ def road_search(matrix, inital_inx, final_inx):
             if matrix[i][j] != 0:
                 visitors.append(j)
         adjacency_set.update({i: visitors})
-    
-    print(adjacency_set)
 
 
     ways = []
@@ -140,22 +138,38 @@ def road_search(matrix, inital_inx, final_inx):
       
       flag += 1
 
-    
-      
+import networkx as nx
+import numpy as np
+def min_path(matrix, inital_inx, final_inx):
+    ord_A = ordered_graph(matrix)[0]
+    G = nx.from_numpy_matrix(np.matrix(ord_A), create_using=nx.DiGraph)
+    summa = 0
+    try:
+        path = nx.dijkstra_path(G, int(inital_inx) - 1, int(final_inx) - 1)
+        if path != None:
+            for i in range(len(path) - 1):
+                summa += G[path[i]][path[i + 1]]['weight']
 
+        path = [i + 1 for i in path]
+        return path, summa
+
+    except:
+        print('Нет пути или неправильно указаны вершины')
+        return -1, -1
 
 
 
 if __name__ == "__main__":
 
-  stock, source = stock_source_search(matrix)
-  ord_A, vertex_redefinition = ordered_graph(matrix) 
+  # stock, source = stock_source_search(matrix)
+  ord_A = ordered_graph(matrix)[0]
 
-  ways = road_search(ord_A, 0, 16)
+  # ways = road_search(ord_A, 0, 16)
+  min_path(ord_A, 1, 17)
 
-  print(ways)
+  # print(ways)
 
-  for i in range(17):
-    print(ord_A[i])
+  # for i in range(17):
+  #   print(ord_A[i])
   
-  print(vertex_redefinition)
+  # print(vertex_redefinition)

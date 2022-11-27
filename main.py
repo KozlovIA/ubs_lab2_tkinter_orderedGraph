@@ -38,6 +38,8 @@ def del_all_obj(reload=False):
         for widget in ord_vertex_labels:
             widget.destroy()
     except: pass
+    try: frame_finding_way.destroy()
+    except: pass
 
 
 
@@ -195,13 +197,16 @@ def readMatrix():
 def output_orderedMatrix():
     """Функция для вывода упорядоченной матрицы"""
 
-    global frame_A_orderedMatrix
+    global frame_A_orderedMatrix, frame_finding_way
     global ordMatrix_numbering_labels
+    global frame_finding_way, entery_init, entery_finish
     try:
         for widget in ordMatrix_numbering_labels:
             widget.destroy()
     except: pass
     try: frame_A_orderedMatrix.destroy()
+    except: pass
+    try: frame_finding_way.destroy()
     except: pass
     
     if readMatrix() != 0: return
@@ -231,6 +236,65 @@ def output_orderedMatrix():
             else: color = "White"
             temp = tk.Label(frame_A_orderedMatrix, width=3, text=ord_A_matrix[i][j], background=color); temp.place(x=20*j, y=20*i)
             A_ordMatrix_output_lb[i].append(temp)
+
+    
+    frame_finding_way = tk.Frame(root, width=300, height=70)#), background="#b22222")
+    frame_finding_way.place(x=30*len(A_matrix_value)-25+300, y=220+20*len(A_matrix_value)+20)
+    ttk.Label(frame_finding_way, text="Из:").place(x=0, y=0)
+    entery_init = tk.Entry(frame_finding_way, width=5)
+    entery_init.place(x=20, y=0)
+    ttk.Label(frame_finding_way, text="В:").place(x=50, y=0)
+    entery_finish = tk.Entry(frame_finding_way, width=5)
+    entery_finish.place(x=70, y=0)
+    tk.Button(frame_finding_way, text="Найти минимальную длину", command=output_minimal_way, width=25).place(x=110, y=0)
+
+
+def output_minimal_way():
+    """Вывод и поиск минимального пути"""
+    entery_init_value = ""
+    entery_finish_value = ""
+    try:
+        entery_init_value = str(entery_init.get())
+    except:
+        entery_init_value = str(entery_init.cget('text'))
+    try:
+        entery_finish_value = str(entery_finish.get())
+    except:
+        entery_finish_value = str(entery_finish.cget('text'))
+    try:
+        entery_init_value = int(entery_init_value)
+        if entery_init_value < 1 or entery_init_value > matrix_size:
+            messagebox.showerror(title="Ошибка ввода", 
+                message=f"Следует ввести номера вершин в диапазоне от 1 до {matrix_size}")
+            return -1
+    except:
+        messagebox.showerror(title="Ошибка ввода", 
+            message=f"Следует ввести номера вершин в диапазоне от 1 до {matrix_size}")
+        return -1
+    try:
+        entery_finish_value = int(entery_finish_value)
+        if entery_finish_value < 1 or entery_finish_value > matrix_size:
+            messagebox.showerror(title="Ошибка ввода", 
+                message=f"Следует ввести номера вершин в диапазоне от 1 до {matrix_size}")
+            return -1
+    except:
+        messagebox.showerror(title="Ошибка ввода", 
+            message=f"Следует ввести номера вершин в диапазоне от 1 до {matrix_size}")
+        return -1
+    if entery_finish_value <= entery_init_value:
+        messagebox.showerror(title="Ошибка ввода", 
+            message="Конечная вершина должна быть больше начальной")
+        return -1
+        
+    optimal_way, min_dist = min_path(A_matrix_value, entery_init_value, entery_finish_value)
+    optWay_text = ""
+    for v in list(optimal_way):
+        optWay_text += str(v) + "-->"
+    optWay_text = optWay_text[0:len(optWay_text)-3]
+
+    ttk.Label(frame_finding_way, text="Оптимальный путь: "+optWay_text).place(x=0, y=30)
+    ttk.Label(frame_finding_way, text="Длина пути: "+str(min_dist)).place(x=0, y=50)
+
 
 
 def output_sourceStock():
