@@ -194,6 +194,7 @@ def levels(fill_cell_list):
 
 def urovni():
     global empty_cell_list, fill_cell_list, dim, result, fill_cell_list_0, renum_list
+    print(empty_cell_list, fill_cell_list, dim, result, fill_cell_list_0, renum_list, sep='\n||||')
     levels(fill_cell_list)
     window_10 = Tk()
     window_10.geometry('300x500')

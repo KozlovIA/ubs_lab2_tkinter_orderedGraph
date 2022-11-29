@@ -312,11 +312,11 @@ def output_sourceStock():
     stock, source = stock_source_search(A_matrix_value)
     labelsText = "Стоки: "
     for st in stock:
-        labelsText += str(st+1)
+        labelsText += str(st+1) + " "
 
     labelsText += "\nИстоки: "
     for sr in source:
-        labelsText += str(sr+1)
+        labelsText += str(sr+1) + " "
 
     stockSource_label = ttk.Label(root, text=labelsText)
     stockSource_label.place(x=20, y=20*len(A_matrix_value)+195+45)
@@ -332,24 +332,24 @@ def output_graphLevels():
 
     if readMatrix() != 0: return
 
-    graph_levelsDict = ordered_graph(A_matrix_value)[2]
-    if graph_levelsDict == -1:
+    ord_matrix, ord_index, adjacency_set = ordered_graph(matrix)
+    if ord_matrix == -1:
         messagebox.showinfo(message=f'В графе найден цикл {ordered_graph(A_matrix_value)[3]}')
         return -1
 
     headerLabel = ttk.Label(root, text="Уровни графа")
     headerLabel.place(x=20+25*len(A_matrix_value)-25, y=195)
     graph_levels_labels = [headerLabel]
-    i=0
-    for key in graph_levelsDict.keys():
-        adj = graph_levelsDict[key]
-        labelText = "N" + str(i+1) + ": {" + str(key+1) + ": ["
-        i+=1
-        for v in adj:
-            labelText += str(v) + ", "
-        labelText = labelText[0:len(labelText)-2] + "]}"
+
+    lvls = levels(ord_matrix, ord_index)
+
+    
+
+    for i in range(len(lvls)):
+        labelText = "N" + str(i) + ": " + str(lvls[i]) + '\n'
+
         temp = ttk.Label(root, text=labelText)
-        temp.place(x=20+25*len(A_matrix_value)-20, y=195+20*i)
+        temp.place(x=20+25*len(A_matrix_value)-20, y=195+20*i+20)
         graph_levels_labels.append(temp)
 
 

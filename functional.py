@@ -1,6 +1,7 @@
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import random as rnd
+import math
 # матрица смежности
 matrix = [
     [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 3],
@@ -37,6 +38,7 @@ def stock_source_search(matrix):
   return stock, source
 
 def GetInputNodesArray(nodes, count):
+    """Вспомогательная функция для TopologicSort"""
     array = []
     for i in count: 
         step=0
@@ -46,6 +48,7 @@ def GetInputNodesArray(nodes, count):
     return array;
 
 def TopologicSort(nodes_input, count):
+    """Функция получения вершин графа к упорядоченном порядке"""
     nodes = []
     for i in count:
       nodes.append([])
@@ -113,6 +116,64 @@ def ordered_graph(matrix):
     return ord_matrix, ord_index, adjacency_set
 
 
+def levels(ord_matrix, ord_index):
+    """Уровни графа по матрице упорядоченной матрице смежности"""
+    for i in range(len(ord_matrix)):
+        for j in range(len(ord_matrix)):
+            if ord_matrix[i][j] == 0:
+                ord_matrix[i][j] = math.inf
+
+    digs = []
+    temp = []
+    for i in range(len(ord_matrix)):
+        for j in range(len(ord_matrix)):
+            if ord_matrix[j][i] != math.inf:
+                temp.append(j + 1)
+
+        digs.append(temp)
+        temp = []
+
+    lvl = []
+    for i in range(len(digs)):
+        for j in range(len(digs)):
+            if len(digs[i]) == j:
+                lvl.append(digs)
+    del lvl[1:]
+    lvl = lvl[0]
+    ind = []
+    temp_ind = []
+    lvl_check = lvl.copy()
+    min_len = min(lvl_check, key=len)
+    for i in range(len(lvl_check)):
+        if lvl_check[i] == min_len:
+            ind.append(i + 1)
+
+    temp_ind.append(ind)
+    for j in range(1, len(lvl)):
+        flat_list = [item for sublist in temp_ind for item in sublist]
+        ind = [i + 1 for i, q in enumerate(lvl) if q and not set(q) - set(flat_list)]
+        for k in range(len(ind)):
+            if ind[k] in flat_list:
+                ind[k] -= 999
+        temp_ind.append(ind)
+    final_ind = [[] * i for i in range(len(temp_ind))]
+    for i in range(len(temp_ind)):
+        for j in range(len(temp_ind[i])):
+            if temp_ind[i][j] > 0:
+                final_ind[i].append(temp_ind[i][j])
+    result = []
+    for i in final_ind:
+        if i:
+            result.append(i)
+    
+    ord_index_revers = dict(zip(ord_index.values(), ord_index.keys()))
+    for i in range(len(result)):
+      for j in range(len(result[i])):
+        result[i][j] = ord_index_revers[result[i][j]-1] + 1
+
+    return result
+
+
 def min_path(matrix, inital_inx, final_inx):
     """Поиск минимального расстояния
     return optimal_way - список индексов представляющих собой оптимальный путь, min_dist - расстояние пройденное по оптимальному пути"""
@@ -132,7 +193,7 @@ def min_path(matrix, inital_inx, final_inx):
         # нет пути
         return -1, -1
 
-import random as rnd
+
 def graph_generation_without_loop(matrix_size):
     """Генерация графа без цикла"""
     matrix = []
