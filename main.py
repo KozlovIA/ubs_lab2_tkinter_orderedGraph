@@ -54,6 +54,8 @@ def matrix_painting():
             try:
                 if int(A_matrix[i][j].get()) != 0:
                     A_matrix[i][j].config({"background": get_rgb((128, 203, 196))})
+                else:
+                    A_matrix[i][j].config({"background": "White"})
             except:
                 pass
 
@@ -97,19 +99,13 @@ def set_matrix(set_random=False):
     A_matrix = []   # матрица содержащая виджеты элементов исходной матрицы смежности
 
     if set_random:
+        random_matrix = graph_generation_without_loop(matrix_size)
         source, stock = rnd.randint(0, matrix_size-1), rnd.randint(0, matrix_size-1)
         for i in range(matrix_size):
             A_matrix.append([])
             for j in range(matrix_size):
-                var = int()
-                if i == stock or j == source or i == j:
-                    var = 0
-                else:
-                    for v in range(10):
-                        var = rnd.randint(0, 10)
-                        if var == 0: break
                 strVar = StringVar()
-                strVar.set(str(var))
+                strVar.set(str(random_matrix[i][j]))
                 temp_A_matrix = Entry(frame_A_matrix, width=3, textvariable=strVar, validate="all", validatecommand=matrix_painting); temp_A_matrix.place(x=20*j, y=20*i)
                 A_matrix[i].append(temp_A_matrix)
         set_random = False
@@ -126,7 +122,9 @@ def set_matrix(set_random=False):
             for i in range(matrix_size):
                 A_matrix.append([])
                 for j in range(matrix_size):
-                    temp_A_matrix = tk.Entry(frame_A_matrix, width=3, validate="all", validatecommand=matrix_painting); temp_A_matrix.place(x=20*j, y=20*i)
+                    strVar = StringVar()
+                    strVar.set(0)
+                    temp_A_matrix = tk.Entry(frame_A_matrix, width=3, textvariable=strVar, validate="all", validatecommand=matrix_painting); temp_A_matrix.place(x=20*j, y=20*i)
                     A_matrix[i].append(temp_A_matrix)
     matrix_painting()
 
@@ -138,10 +136,11 @@ def set_matrix(set_random=False):
     tk.Button(frame_button, text="Показать упорядочивание вершин", command=output_orderedVertex, width=50).place(x=0, y=50)
     tk.Button(frame_button, text="Построить матрицу смежности упорядоченного графа", command=output_orderedMatrix, width=50).place(x=0, y=75)
     tk.Button(frame_button, text="Показать исходный граф", command=source_graph, width=50).place(x=0, y=100)
-    tk.Button(frame_button, text="Показать упорядоченный граф", command=ordered_graph_plt     , width=50).place(x=0, y=125)
+    tk.Button(frame_button, text="Показать упорядоченный граф", command=ordered_graph_plt, width=50).place(x=0, y=125)
 
     
 def check_source_stock(matr):
+    """Проверка наличия стоков и истоков"""
     stock, source = stock_source_search(matr)
     if stock == [] and source == []:
         messagebox.showerror(title="Ошибка ввода", 
@@ -159,6 +158,7 @@ def check_source_stock(matr):
 
 def readMatrix():
     """Чтение матрицы в глобальную переменную и проверка значений матрицы"""
+    matrix_painting()
     global A_matrix_value
     A_matrix_value = []
     for i in range(len(A_matrix)):
@@ -212,6 +212,9 @@ def output_orderedMatrix():
     if readMatrix() != 0: return
     
     ord_A_matrix = ordered_graph(A_matrix_value)[0]     # упорядочивание матрицы смежности
+    if ord_A_matrix == -1:
+        messagebox.showinfo(message=f'В графе найден цикл {ordered_graph(A_matrix_value)[3]}')
+        return -1
 
     # вывод упорядоченной матрицы
     label_ordMatrix = ttk.Label(root, text="Матрица смежности упорядоченного графа")
@@ -287,6 +290,9 @@ def output_minimal_way():
         return -1
         
     optimal_way, min_dist = min_path(A_matrix_value, entery_init_value, entery_finish_value)
+    if optimal_way == -1 and min_dist == -1:
+        messagebox.showerror(title="Ошибка!", 
+            message="Нет пути или неверно заданы вершины.")
     optWay_text = ""
     for v in list(optimal_way):
         optWay_text += str(v) + "-->"
@@ -327,9 +333,12 @@ def output_graphLevels():
     if readMatrix() != 0: return
 
     graph_levelsDict = ordered_graph(A_matrix_value)[2]
+    if graph_levelsDict == -1:
+        messagebox.showinfo(message=f'В графе найден цикл {ordered_graph(A_matrix_value)[3]}')
+        return -1
 
     headerLabel = ttk.Label(root, text="Уровни графа")
-    headerLabel.place(x=25*len(A_matrix_value)-25, y=195)
+    headerLabel.place(x=20+25*len(A_matrix_value)-25, y=195)
     graph_levels_labels = [headerLabel]
     i=0
     for key in graph_levelsDict.keys():
@@ -340,7 +349,7 @@ def output_graphLevels():
             labelText += str(v) + ", "
         labelText = labelText[0:len(labelText)-2] + "]}"
         temp = ttk.Label(root, text=labelText)
-        temp.place(x=25*len(A_matrix_value)-20, y=195+20*i)
+        temp.place(x=20+25*len(A_matrix_value)-20, y=195+20*i)
         graph_levels_labels.append(temp)
 
 
@@ -355,6 +364,10 @@ def output_orderedVertex():
     if readMatrix() != 0: return
 
     ord_vertex = ordered_graph(A_matrix_value)[1]   # словарь ключ - старый индекс, значение - новый индекс
+    if ord_vertex == -1:
+        messagebox.showinfo(message=f'В графе найден цикл {ordered_graph(A_matrix_value)[3]}')
+        return -1
+    
 
     headerLabel = ttk.Label(root, text="Упорядочивание вершин")
     headerLabel.place(x=25*len(A_matrix_value)+150-25, y=195)
@@ -389,6 +402,9 @@ def ordered_graph_plt():
     """График упорядоченного графа"""
     if readMatrix() != 0: return
     ord_A_matrix = ordered_graph(A_matrix_value)[0]
+    if ord_A_matrix == -1:
+        messagebox.showinfo(message=f'В графе найден цикл {ordered_graph(A_matrix_value)[3]}')
+        return -1
 
     fig = plt.figure()
     G = nx.from_numpy_matrix(np.matrix(ord_A_matrix), create_using=nx.DiGraph)
@@ -397,38 +413,14 @@ def ordered_graph_plt():
     labels = nx.get_edge_attributes(G, "weight")
     nx.draw_networkx_edge_labels(G, pos=layout, edge_labels=labels)
     try:
-        zukl = nx.find_cycle(G)
-        messagebox.showinfo(message=f'В графе найден цикл {zukl}')
+        cycle = nx.find_cycle(G)
+        messagebox.showinfo(message=f'В графе найден цикл {cycle}')
+        return
     except:
         pass
     fig.savefig("orderedGraph.png")
     image = Image.open("orderedGraph.png")
     image.show()
-
-
-
-# def graph_window(ord=False):
-#     """Отдельное окно для визуализации графа"""
-#     window = Tk()
-#     window.geometry('1366x786+0+0')    # ширина на высоту и сколько пикселей от верхнего левого угла
-
-#     if not ord:
-#         source_graph()
-#         title_ = "Визуализация исходного графа"
-#         file = "sourceGraph.png"
-        
-#     else:
-#         ordered_graph_plt()
-#         title_ = "Визуализация упорядоченного графа"
-#         file = "orderedGraph.png"
-
-#     window.title(title_)
-#     img = PhotoImage(file=file)
-#     graph = ttk.Label(window, image=img)
-#     graph.image_ref = img
-#     graph.place(x=0, y=0)
-
-#     window.mainloop()
 
     
 
