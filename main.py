@@ -38,7 +38,8 @@ def del_all_obj(reload=False):
         for widget in ord_vertex_labels:
             widget.destroy()
     except: pass
-    try: frame_finding_way.destroy()
+    try:
+        frame_finding_way.destroy()
     except: pass
 
 
@@ -297,9 +298,17 @@ def output_minimal_way():
     for v in list(optimal_way):
         optWay_text += str(v) + "-->"
     optWay_text = optWay_text[0:len(optWay_text)-3]
+    global text_way, len_way
+    try:
+        text_way.destroy()
+        len_way.destroy()
+    except:
+        pass
 
-    ttk.Label(frame_finding_way, text="Оптимальный путь: "+optWay_text).place(x=0, y=30)
-    ttk.Label(frame_finding_way, text="Длина пути: "+str(min_dist)).place(x=0, y=50)
+    text_way = ttk.Label(frame_finding_way, text="Оптимальный путь: "+optWay_text)
+    text_way.place(x=0, y=30)
+    len_way = ttk.Label(frame_finding_way, text="Длина пути: "+str(min_dist))
+    len_way.place(x=0, y=50)
 
 
 
@@ -332,7 +341,7 @@ def output_graphLevels():
 
     if readMatrix() != 0: return
 
-    ord_matrix, ord_index, adjacency_set = ordered_graph(matrix)
+    ord_matrix, ord_index, adjacency_set = ordered_graph(A_matrix_value)
     if ord_matrix == -1:
         messagebox.showinfo(message=f'В графе найден цикл {ordered_graph(A_matrix_value)[3]}')
         return -1

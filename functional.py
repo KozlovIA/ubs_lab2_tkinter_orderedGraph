@@ -214,7 +214,6 @@ def graph_generation_without_loop(matrix_size):
       G = nx.from_numpy_matrix(np.matrix(matrix), create_using=nx.DiGraph)
       try:
           cycle = nx.find_cycle(G)
-          print(cycle, len(cycle))
           # if len(cycle) == 0: break
           matrix[cycle[0][0]][cycle[0][1]] = 0
       except:
